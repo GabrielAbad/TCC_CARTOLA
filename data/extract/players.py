@@ -26,6 +26,7 @@ SOURCE_TO_OUTPUT = {
     "atletas.media_num": "media_num",
     "atletas.variacao_num": "variacao_num",
     "atletas.status_id": "status_id",
+    "atletas.entrou_em_campo": "entrou_em_campo",
 }
 SCOUT_COLUMNS = [
     "G",
@@ -58,9 +59,11 @@ OUTPUT_COLUMNS = [
     "media_num",
     "variacao_num",
     "status_id",
+    "entrou_em_campo",
     *SCOUT_COLUMNS,
 ]
 ID_COLUMNS = ["rodada_id", "atleta_id", "posicao_id", "clube_id", "status_id"]
+BOOL_COLUMNS = ["entrou_em_campo"]
 FLOAT_COLUMNS = ["pontos_num", "preco_num", "media_num", "variacao_num", *SCOUT_COLUMNS]
 
 
@@ -134,7 +137,22 @@ def _normalize_round(df: pd.DataFrame) -> pd.DataFrame:
     normalized[SCOUT_COLUMNS] = normalized[SCOUT_COLUMNS].fillna(0)
     normalized[ID_COLUMNS] = normalized[ID_COLUMNS].astype("int64")
     normalized[FLOAT_COLUMNS] = normalized[FLOAT_COLUMNS].astype("float64")
+    for column in BOOL_COLUMNS:
+        normalized[column] = normalized[column].map(_to_bool).astype("bool")
     return normalized
+
+
+def _to_bool(value: object) -> bool:
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"true", "1", "yes"}:
+            return True
+        if normalized in {"false", "0", "no", ""}:
+            return False
+        raise ValueError(f"Cannot convert {value!r} to bool")
+    if pd.isna(value):
+        return False
+    return bool(value)
 
 
 def _parse_args() -> argparse.Namespace:

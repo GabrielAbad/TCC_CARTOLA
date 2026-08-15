@@ -1,2 +1,7 @@
 pandas
 requests
+matplotlib
+seaborn
+scipy
+statsmodels
+reportlab
