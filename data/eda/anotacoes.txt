@@ -1,0 +1,20 @@
+1 - Usamos apenas os jogadores marcados como prováveis e que efetivamente entraram em campo, 
+pois é com esses dados que os modelos de previsão de pontuação serão treinados.
+
+2 - Formação do time deve conter laterais para melhor pontuação por causa
+da mediana dos laterais. (Existe formação sem laterais)
+
+3 - O coeficiente de variação da pontuação nos mostra algo interessante, enquanto a média
+é 4 por exemplo, normalmente o std é muito próximo da média, o que mostra que tem muitos
+jogadores pontuando bem, tipo 8, enquanto muitos nao pontuam nada. 
+
+4 - Zagueiros e meias sempre pontuam menos na média em comparação com outras posições.
+Talvez isso possa ser útil na hora de otimizar o custo do time, priorizar o preço dos atacantes
+goleiros e laterais em vez dessas 2 posições.
+
+5 - Na hora de considerar a série histórica de pontuação dos jogadores,
+nós consideramos para análise somente as vezes que ele entrou. (não preenche
+0 nas rodadas que ele não jogou) 
+
+6 - Dar peso para jogadores que vem pontuando bem ultimamente faz mais sentido,
+o que é mostrado no gráfico de ACF e no de PACF
