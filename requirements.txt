@@ -1,7 +1,12 @@
 pandas
+numpy
 requests
 matplotlib
 seaborn
 scipy
 statsmodels
 reportlab
+networkx
+jupyter
+ipykernel
+scikit-learn
