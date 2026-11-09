@@ -10,3 +10,8 @@ networkx
 jupyter
 ipykernel
 scikit-learn
+xgboost
+lightgbm
+optuna
+pulp>=3.3
+pytest

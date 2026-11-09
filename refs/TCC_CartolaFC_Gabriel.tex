@@ -1,0 +1,681 @@
+%===========================================================
+% TCC — FGV/EMAp
+% Predição e Recomendação de Escalações no Cartola FC
+% Gabriel Rodrigues de Deus Abad
+% Orientador: Prof. Moacyr Alvim Horta Barbosa da Silva
+%===========================================================
+
+\documentclass[12pt, a4paper, oneside]{article}
+
+%------------------------------------------------------------
+% Pacotes
+%------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{amsmath, amssymb}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{natbib}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+
+%------------------------------------------------------------
+% Layout
+%------------------------------------------------------------
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, left=3.0cm, right=2.5cm}
+\setstretch{1.3}
+\setlength{\parindent}{1.25cm}
+\setlength{\headheight}{15pt}
+
+%------------------------------------------------------------
+% Cores
+%------------------------------------------------------------
+\definecolor{azulfgv}{RGB}{0,51,102}
+\definecolor{verdedest}{RGB}{26,122,74}
+\definecolor{cinzaclaro}{RGB}{245,247,250}
+
+%------------------------------------------------------------
+% Seções
+%------------------------------------------------------------
+\titleformat{\section}
+  {\large\bfseries\color{azulfgv}}{\thesection.}{0.6em}{}
+  [\vspace{-0.3em}\textcolor{azulfgv}{\rule{\linewidth}{0.8pt}}]
+\titleformat{\subsection}
+  {\normalsize\bfseries\color{azulfgv}}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries}{\thesubsubsection.}{0.5em}{}
+
+%------------------------------------------------------------
+% Cabeçalho/rodapé
+%------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{azulfgv}{\textbf{FGV/EMAp}}}
+\fancyhead[R]{\small Gabriel Rodrigues de Deus Abad}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.6pt}
+
+%------------------------------------------------------------
+% Caixa de implicação
+%------------------------------------------------------------
+\tcbuselibrary{skins,breakable}
+\newtcolorbox{insightbox}{
+  enhanced, colback=cinzaclaro, colframe=azulfgv,
+  fonttitle=\bfseries\small, title=Implicação para Modelagem,
+  left=4pt, right=4pt, top=4pt, bottom=4pt,
+  boxrule=0.6pt, breakable
+}
+
+%------------------------------------------------------------
+% Hyperref
+%------------------------------------------------------------
+\hypersetup{
+  colorlinks=true, linkcolor=azulfgv,
+  citecolor=verdedest, urlcolor=azulfgv,
+  pdftitle={Predicao e Recomendacao de Escalacoes no Cartola FC},
+  pdfauthor={Gabriel Rodrigues de Deus Abad}
+}
+
+%============================================================
+\begin{document}
+%============================================================
+
+%------------------------------------------------------------
+% CAPA
+%------------------------------------------------------------
+\thispagestyle{empty}
+\begin{center}
+  {\large\bfseries\color{azulfgv} FUNDAÇÃO GETULIO VARGAS}\\[0.3em]
+  {\normalsize\color{azulfgv} ESCOLA DE MATEMÁTICA APLICADA -- FGV/EMAp}\\[0.3em]
+  {\normalsize\color{azulfgv} CURSO DE GRADUAÇÃO EM MATEMÁTICA APLICADA}\\[2.5cm]
+  {\Large\bfseries\color{azulfgv}
+    Predição e Recomendação de Escalações no Cartola FC}\\[0.6em]
+  {\large\itshape
+    Combinando Aprendizado de Máquina e Ciência de Redes\\
+    para Maximizar a Pontuação por Rodada}\\[2.5cm]
+  {\normalsize
+    \begin{tabular}{rl}
+      \textbf{Autor:}      & Gabriel Rodrigues de Deus Abad \\[0.3em]
+      \textbf{Orientador:} & Prof.\ Moacyr Alvim Horta Barbosa da Silva \\[0.3em]
+      \textbf{Curso:}      & Graduação em Matemática Aplicada \\[0.3em]
+      \textbf{Data:}       & 2026 \\
+    \end{tabular}}
+\end{center}
+\vfill\newpage
+
+%------------------------------------------------------------
+% RESUMO
+%------------------------------------------------------------
+\thispagestyle{empty}
+\begin{center}{\large\bfseries Resumo}\end{center}
+\vspace{0.5em}
+
+O Cartola FC é o maior \textit{fantasy game} de futebol do mundo em número de usuários
+ativos. A escolha de quais jogadores escalar a cada rodada constitui um problema de
+otimização combinatória com incerteza: a pontuação futura de cada atleta depende de
+desempenho recente, qualidade do adversário, mando de campo e disponibilidade para jogo.
+Este trabalho propõe um sistema \textit{end-to-end} que, a partir dos dados históricos
+das 18 primeiras rodadas do Campeonato Brasileiro 2026, prevê a pontuação individual de
+cada atleta e recomenda a escalação de maior pontuação esperada dentro das restrições do
+jogo. A metodologia combina: (i)~engenharia de \textit{features} temporais com janelas
+deslizantes sobre os scouts individuais; (ii)~métricas de ciência de redes:
+PageRank ponderado e sistema Elo, calculadas sobre um grafo cumulativo de resultados,
+para quantificar a força relativa dos adversários; (iii)~comparação de modelos preditivos
+(Ridge, XGBoost, LightGBM e LSTM) sob protocolo de validação temporal
+\textit{walk-forward}; e (iv)~resolução do problema de escalação via Programação Linear
+Inteira (PLI). A análise exploratória revela que o status do atleta é a variável de
+filtragem mais crítica: atletas ``Prováveis'' apresentam taxa de participação de 86,4\%
+e pontuação média 6,3$\times$ superior à de atletas em ``Dúvida''. As \textit{features}
+de desempenho histórico de curto prazo dominam o poder preditivo pré-treino, com
+correlação de Spearman com o \textit{target} acima de 0,45.
+
+\vspace{1em}\noindent
+\textbf{Palavras-chave:} Fantasy Sports; Cartola FC; Aprendizado de Máquina;
+Ciência de Redes; PageRank; Programação Linear Inteira; Séries Temporais.
+
+\newpage
+
+%------------------------------------------------------------
+% SUMÁRIO
+%------------------------------------------------------------
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+
+%============================================================
+\setcounter{page}{1}
+
+% ============================================================
+\section{Introdução}
+\label{sec:intro}
+% ============================================================
+
+O Cartola FC é um jogo de \textit{fantasy} esportivo em que cada usuário monta
+semanalmente um time de doze integrantes (onze jogadores de campo e um técnico)
+respeitando restrições de posição e orçamento em cartoletas. A pontuação de cada atleta
+é calculada com base em eventos reais da partida: gols (8,0~pts), assistências (5,0~pts),
+defesas exclusivas de goleiros (1,3~pt), desarmes (1,5~pt) e penalidades como cartões
+amarelos ($-$1,0~pt), entre outros. O objetivo de cada participante é maximizar a
+pontuação total do time por rodada, tornando a decisão de escalação um problema de
+otimização combinatória com incerteza.
+
+Atualmente, a maioria dos usuários apoia suas escolhas em análises subjetivas ou
+tendências de redes sociais. A disponibilidade de dados granulares por rodada via API
+pública do Cartola FC cria uma oportunidade concreta para a aplicação de métodos
+quantitativos rigorosos.
+
+\subsection{Objetivos}
+
+O objetivo geral é desenvolver um sistema preditivo e de recomendação capaz de sugerir,
+para cada rodada, a escalação de maior pontuação esperada dentro das restrições do
+Cartola FC. Os objetivos específicos são:
+
+\begin{enumerate}[leftmargin=*, label=(\roman*)]
+  \item Realizar análise exploratória dos dados das 18 primeiras rodadas do Brasileirão 2026;
+  \item Construir um conjunto de \textit{features} temporais, contextuais e estruturais
+        sem vazamento de dados;
+  \item Integrar métricas de ciência de redes, PageRank ponderado e Elo, como
+        \textit{features} de força do adversário;
+  \item Comparar modelos preditivos de pontuação individual com protocolo
+        \textit{walk-forward};
+  \item Formular e resolver o problema de escalação via Programação Linear Inteira.
+\end{enumerate}
+
+\subsection{Contribuições}
+
+A contribuição metodológica central é a integração de métricas de redes complexas,
+construídas sobre um grafo cumulativo de resultados, como \textit{features} em modelos
+preditivos de pontuação individual no Cartola FC. O trabalho documenta um
+\textit{pipeline end-to-end} reproduzível, desde a coleta via API até a recomendação
+final, com protocolo de validação temporal rigoroso que elimina qualquer vazamento de
+dados futuros.
+
+% ============================================================
+\section{Revisão Bibliográfica}
+\label{sec:revisao}
+% ============================================================
+
+A literatura de predição em \textit{fantasy sports} é dominada pelo contexto
+norte-americano (NFL). \citet{beal2020} demonstraram que modelos de \textit{ensemble}
+em particular \textit{gradient boosting}, que superam médias históricas quando
+\textit{features} de contexto (adversário, mando, fadiga) são incorporadas, resultado
+que orienta diretamente a engenharia de \textit{features} proposta neste trabalho.
+No futebol europeu, \citet{pappalardo2019} construíram um conjunto de dados de eventos
+de alta resolução e mostraram que contribuições individuais vão além dos scouts
+tradicionais.
+
+Para ranqueamento via redes, \citet{page1999} introduziram o PageRank, cuja extensão
+ao contexto esportivo é natural: uma equipe é forte se venceu equipes fortes.
+O sistema de ratings Elo, proposto por \citet{elo1978} para o xadrez e adaptado ao
+futebol, oferece alternativa dinâmica amplamente adotada em plataformas como
+FiveThirtyEight. Na etapa de otimização, o problema de escalação se assemelha ao
+\textit{Multiple-choice Knapsack Problem} \citep{kellerer2004}; a formulação via PLI
+garante solução ótima para as dimensões do problema. Os modelos preditivos incluem
+o XGBoost \citep{chen2016} como referência estado-da-arte em dados tabulares e redes
+LSTM \citep{hochreiter1997} para captura explícita de dependências temporais.
+
+% ============================================================
+\section{Dados}
+\label{sec:dados}
+% ============================================================
+
+\subsection{Fontes e Coleta}
+
+Os dados provêm de duas fontes referentes às 18 primeiras rodadas do Brasileirão 2026:
+(i)~\textbf{API pública do Cartola FC}: por rodada, dados de cada atleta escalável:
+pontuação real (\texttt{pontos\_num}), preço (\texttt{preco\_num}), 18 scouts individuais
+e status de disponibilidade (\texttt{status\_id}); (ii)~\textbf{Resultados das partidas}
+(\texttt{games.csv}): placar oficial com identificação de mandante e visitante.
+
+\subsection{Caracterização}
+
+\begin{table}[H]
+\centering
+\caption{Características do dataset bruto}
+\label{tab:dataset}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Dimensão} & \textbf{players.csv} & \textbf{games.csv}\\
+\midrule
+Registros totais  & 13.215 & 179 \\
+Rodadas           & 18     & 18  \\
+Atletas únicos    & 845    & {-} \\
+Clubes            & 20     & 20  \\
+Variáveis         & 28     &  7  \\
+Valores ausentes  & 0      &  0  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Amostra de Treino}
+\label{subsec:amostra}
+
+A modelagem restringe-se à \textbf{amostra de treino}: atletas com status ``Provável''
+(status\_id\,=\,7) que efetivamente entraram em campo (\texttt{entrou\_em\_campo}~=~1).
+Esta restrição é motivada empiricamente na Seção~\ref{subsec:status}: a diferença de
+pontuação média entre ``Provável'' e ``Dúvida'' é de 6,3$\times$
+(3,68 vs.\ 0,58~pts), e a taxa de participação cai de 86,4\% para 24,9\%.
+Dos 13.215 registros totais, 3.294 compõem a amostra de treino.
+
+% ============================================================
+\section{Metodologia}
+\label{sec:metodologia}
+% ============================================================
+
+O \textit{pipeline} segue cinco etapas sequenciais:
+
+\medskip
+\noindent
+\textbf{Coleta \& Pré-proc.}
+$\to$ \textbf{EDA}
+$\to$ \textbf{Eng.\ de \textit{Features}}
+$\to$ \textbf{Modelagem}
+$\to$ \textbf{Otimização}
+\medskip
+
+\subsection{Engenharia de \textit{Features}}
+\label{subsec:features}
+
+O dataset final \texttt{df\_features} tem uma linha por par (atleta,~rodada) e
+$\approx$65 colunas. O protocolo \textit{walk-forward} garante que toda \textit{feature}
+da rodada $t$ usa exclusivamente dados das rodadas $1,\ldots,t-1$, eliminando
+\textit{data leakage}. As \textit{features} são organizadas em cinco blocos:
+
+\subsubsection*{Bloco 1: Desempenho Histórico do Atleta}
+Médias móveis de pontuação com janelas $k \in \{3,5,10\}$ rodadas jogadas
+(\texttt{pts\_avg\_3r}/\texttt{5r}/\texttt{10r}), desvio padrão móvel
+(\texttt{pts\_std\_3r}/\texttt{5r}), máximo e mediana nas últimas 5~rodadas, e
+tendência linear (\texttt{pts\_trend\_5r}), coeficiente angular de regressão
+de pontuação sobre rodada nas últimas 5~aparições. Para cada scout relevante
+(G, A, FT, FF, FD, FS, FC, CA, DS, DE, SG, GS), médias móveis de 3 e 5~rodadas.
+Completam o bloco: proporção de rodadas com pontuação positiva (\texttt{prop\_jogou})
+e sequência consecutiva de rodadas acima da própria média histórica
+(\texttt{pts\_acima\_media\_streak}).
+
+\subsubsection*{Bloco 2: Contexto da Partida}
+Mando de campo binário (\texttt{is\_mandante}); força do adversário via PageRank
+e Elo calculados sobre o grafo acumulado até $t-1$
+(\texttt{adv\_pagerank}, \texttt{adv\_elo}); médias de gols marcados e sofridos
+pelo adversário nas últimas 5~rodadas; histórico \textit{head-to-head} do atleta
+contra aquele adversário (\texttt{h2h\_pts\_avg}); e fase do campeonato
+(\texttt{fase\_campeonato}).
+
+\subsubsection*{Bloco 3: Preço e Mercado}
+Preço atual (\texttt{preco\_num}), variação acumulada nas últimas 3~rodadas
+(\texttt{preco\_variacao\_3r}) e índice custo-benefício histórico
+(\texttt{cb\_avg\_5r}).
+
+\subsubsection*{Bloco 4: \textit{Features} do Time}
+Forma nas últimas 5~rodadas em pontos de tabela (\texttt{time\_forma\_5r}),
+médias de gols marcados/sofridos pelo clube, e PageRank/Elo do próprio time.
+
+\subsubsection*{Bloco 5: Posição e Status}
+Codificação \textit{one-hot} de posição; \texttt{status\_id}; e probabilidade
+empírica de participação dado o status (\texttt{prob\_jogar}), calculada sobre
+o histórico disponível até $t-1$.
+
+\subsection{Ciência de Redes}
+\label{subsec:redes}
+
+Modelamos o campeonato como grafo direcionado e ponderado
+$G_t = (V, E_t)$: 20~nós (clubes), arestas do perdedor ao vencedor ponderadas pelo
+saldo de gols, e empates como arestas bidirecionais com peso~0,5. O grafo é
+reconstruído cumulativamente a cada rodada.
+
+\paragraph{PageRank.}
+Aplicamos o algoritmo de \citet{page1999} com fator de amortecimento $d = 0{,}85$:
+\begin{equation}
+  \mathrm{PR}(u) = \frac{1-d}{N} + d \sum_{v \to u}
+  \frac{\mathrm{PR}(v)\,w(v,u)}{\displaystyle\sum_{x} w(v,x)},
+  \label{eq:pagerank}
+\end{equation}
+onde $N = 20$ e $w(v,u)$ é o peso da aresta. O valor $\mathrm{PR}(\text{adversário})$
+codifica de forma não-linear e transitiva a dificuldade do confronto.
+
+\paragraph{Elo.}
+Rating dinâmico inicializado em 1500 para todos os clubes e atualizado após cada
+partida:
+\begin{equation}
+  R'_A = R_A + K\bigl(S_A - \mathbb{E}[S_A]\bigr),
+  \qquad
+  \mathbb{E}[S_A] = \frac{1}{1 + 10^{(R_B - R_A)/400}},
+  \label{eq:elo}
+\end{equation}
+onde $K$ é o fator de sensibilidade (ajustado empiricamente), $S_A \in \{0;\,0{,}5;\,1\}$
+é o resultado real e $\mathbb{E}[S_A]$ é o resultado esperado. O Elo do clube
+\emph{antes} da rodada $t$ entra como \textit{feature}.
+
+\subsection{Modelos Preditivos}
+\label{subsec:modelos}
+
+Formulamos o problema como regressão supervisionada: dado o vetor
+$\mathbf{x}_{i,t}$, estimar $\hat{y}_{i,t} \approx y_{i,t}$ (pontuação real).
+O protocolo \textit{walk-forward} treina o modelo nas rodadas $4,\ldots,t-1$
+e avalia na rodada $t$, repetindo para $t = 5,\ldots,18$.
+
+Os modelos comparados são:
+\begin{enumerate}[leftmargin=*, label=(\roman*)]
+  \item \textbf{Baseline}: média ponderada das últimas 5~rodadas do atleta;
+  \item \textbf{Ridge / Lasso}: regressão linear com regularização $L_2$ / $L_1$,
+        $\alpha$ ajustado por validação cruzada temporal;
+  \item \textbf{Random Forest}: 300~árvores, \textit{feature importance} via
+        impureza de Gini;
+  \item \textbf{XGBoost / LightGBM}: \textit{gradient boosting} com
+        hiperparâmetros otimizados via Optuna (50 tentativas, otimização bayesiana);
+  \item \textbf{LSTM}: 2~camadas de 64~unidades, \textit{dropout}~0,2,
+        janelas deslizantes de 5~rodadas por atleta.
+\end{enumerate}
+
+Os modelos são treinados \textbf{separadamente por posição} (motivação detalhada
+na Seção~\ref{subsec:feat_pos}).
+Métricas de avaliação: RMSE, MAE, $R^2$ e correlação de Spearman entre pontuação
+prevista e real (esta diretamente relevante para a qualidade do ranking de escalação).
+
+\subsection{Otimização de Escalação}
+\label{subsec:otimizacao}
+
+Dadas as pontuações previstas $\{\hat{y}_{i,t}\}$, o problema de escalação é:
+
+\begin{align}
+  \max_{\mathbf{x}} \quad
+  & \sum_{i} \hat{y}_{i,t}\,x_i \label{eq:obj}\\
+  \text{s.a.} \quad
+  & \sum_{i} c_i\,x_i \leq C \tag{orçamento}\\
+  & \sum_{i:\,p_i=k} x_i = n_k,\quad
+    k \in \{\text{Gol, Lat, Zag, Mei, Ata, Téc}\} \tag{posições}\\
+  & \sum_{i:\,\text{clube}(i)=j} x_i \leq 5,\quad \forall j \tag{concentração}\\
+  & x_i = 0,\quad \forall i : \text{status}(i) \neq \text{Provável} \tag{disponib.}
+\end{align}
+
+com $n_k$ vagas por posição (1 Goleiro, 2 Laterais, 2 Zagueiros, 3 Meias,
+3 Atacantes, 1 Técnico) e $x_i \in \{0,1\}$. Resolvido via solver CBC / PuLP
+em tempo sub-segundo para $\approx$700 atletas disponíveis por rodada.
+
+% ============================================================
+\section{Resultados: EDA e Engenharia de \textit{Features}}
+\label{sec:resultados}
+% ============================================================
+
+\subsection{Distribuição de Pontuações por Posição}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{fig1_dist_posicao.png}
+  \caption{Distribuição de pontuações por posição, restrita à amostra de treino
+           (Provável e em campo). (A)~Violinplot de densidade. (B)~Boxplot com
+           entalhes representando o IC~95\% da mediana.}
+  \label{fig:dist_pos}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Estatísticas descritivas por posição (amostra de treino)}
+\label{tab:stats_pos}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Posição} & \textbf{N} & \textbf{Média} & \textbf{Mediana}
+                 & \textbf{Desvio P.} & \textbf{Máx.}\\
+\midrule
+Goleiro   & 311  & 4,08 & 3,40 & 3,95 & 15,90\\
+Lateral   & 475  & 4,79 & 4,30 & 4,04 & 19,00\\
+Zagueiro  & 555  & 3,32 & 2,40 & 3,47 & 17,40\\
+Meia      & 950  & 3,78 & 2,70 & 3,84 & 19,90\\
+Atacante  & 691  & 4,92 & 3,20 & 4,87 & 26,00\\
+Técnico   & 312  & 5,22 & 4,55 & 2,35 & 12,76\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Atacantes exibem o maior desvio padrão (4,87~pts), confirmando a maior
+imprevisibilidade desta posição. Técnicos têm a maior média (5,22~pts) com
+variância reduzida, pois sua pontuação depende do resultado coletivo do time.
+
+\subsection{Análise Temporal e Autocorrelação}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{fig2_temporal.png}
+  \caption{Evolução temporal da pontuação média por posição. (A)~Séries temporais
+           por rodada. (B)~Heatmap posição $\times$ rodada.}
+  \label{fig:temporal}
+\end{figure}
+
+O coeficiente de variação (CV) permanece entre 86\% e 108\% em todas as 18~rodadas,
+refletindo a natureza assimétrica dos scouts. A análise de ACF/PACF das séries
+individuais (calculada apenas sobre rodadas Provável e em campo, sem imputação de
+zeros) indica dependência temporal predominantemente de lag~1.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\linewidth]{fig3_acf_pacf.png}
+  \caption{ACF e PACF para séries individuais de três atletas representativos:
+           Pedro (Atacante), Danilo (Meia) e Lucas Arcanjo (Goleiro).
+           Bandas: IC~95\% sob hipótese de ruído branco.}
+  \label{fig:acf}
+\end{figure}
+
+\begin{insightbox}
+Ausência de autocorrelação significativa em lags superiores a 2 justifica janelas
+de médias móveis de $k \in \{3,5\}$ rodadas como mecanismo principal de captura
+de tendência. Janelas longas (10~rodadas) são mantidas como \textit{feature}
+complementar, mas com menor peso esperado.
+\end{insightbox}
+
+\subsection{Status e Disponibilidade}
+\label{subsec:status}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{fig7_status_disponibilidade.png}
+  \caption{Análise de status: (A)~volume por categoria; (B)~pontuação média;
+           (C)~taxa de participação em campo (\texttt{entrou\_em\_campo});
+           (D)~distribuição de pontuação por status.}
+  \label{fig:status}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Pontuação e participação por status (base completa)}
+\label{tab:status}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Status} & \textbf{N} & \textbf{Média (pts)}
+                & \textbf{\% Zeros} & \textbf{\% Particip.}\\
+\midrule
+Provável (7)        & 3.812 & 3,68 & 16,4\% & 86,4\%\\
+Dúvida (6)          & 7.809 & 0,58 & 79,1\% & 24,9\%\\
+Suspenso (5)        &   936 & 0,10 & 96,8\% &  4,1\%\\
+Lesionado (3)       &   197 & 1,99 &  6,6\% & 93,4\%\\
+Não Participará (2) &   461 & 2,58 & 31,9\% & 74,2\%\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A diferença de pontuação entre ``Provável'' e ``Dúvida'' é de 6,3$\times$,
+tornando o status a variável de filtragem mais crítica: o modelo treina exclusivamente
+na amostra Provável, e o otimizador exclui atletas com status diferente.
+
+\subsection{Mando de Campo}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{fig6_mandante_visitante.png}
+  \caption{Efeito do mando de campo. (A)~Boxplot global ($t = 7{,}07$, $p < 0{,}001$).
+           (B)~Diferença por posição (Mandante~$-$~Visitante).
+           (C)~Violinplot por posição e mando.}
+  \label{fig:mando}
+\end{figure}
+
+O efeito mandante é significativo em 4 de 5 posições de linha ($\alpha = 0{,}05$),
+com Laterais apresentando o maior ganho absoluto (+1,19~pts, $p = 0{,}001$). Goleiros
+são a exceção ($p = 0{,}17$, n.s.), possivelmente porque o desempenho defensivo
+coletivo dilui o efeito do mando nesta posição.
+
+\begin{table}[H]
+\centering
+\caption{Efeito do mando de campo por posição (amostra de treino)}
+\label{tab:mando}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Posição} & $\bar{y}_{\text{mand.}}$ & $\bar{y}_{\text{visit.}}$
+                 & $\Delta$ & \textbf{Signif.}\\
+\midrule
+Goleiro   & 4,39 & 3,77 & $+$0,62 & n.s.\\
+Lateral   & 5,38 & 4,20 & $+$1,19 & **\\
+Zagueiro  & 3,84 & 2,79 & $+$1,05 & ***\\
+Meia      & 4,14 & 3,39 & $+$0,75 & **\\
+Atacante  & 5,45 & 4,37 & $+$1,08 & **\\
+\bottomrule
+\multicolumn{5}{l}{\small *** $p<0{,}001$, ** $p<0{,}01$, n.s.\ não significativo (teste $t$ de Welch)}
+\end{tabular}
+\end{table}
+
+\subsection{Análise do \texttt{df\_features}}
+
+\subsubsection{Poder Preditivo Pré-Treino}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\linewidth]{fig2_spearman_target.png}
+  \caption{Correlação de Spearman entre cada \textit{feature} e
+           \texttt{pontos\_num} (rodada~$\geq 4$). Barras vermelhas indicam
+           correlação negativa. Ordenado por $|\rho|$ decrescente.}
+  \label{fig:spearman}
+\end{figure}
+
+As \textit{features} de desempenho histórico dominam: \texttt{pts\_avg\_10r},
+\texttt{pts\_avg\_5r} e \texttt{pts\_max\_5r} atingem $\rho \approx 0{,}47$
+(Figura~\ref{fig:spearman}). As métricas de ciência de redes
+(\texttt{adv\_pagerank}, \texttt{adv\_elo}) apresentam $\rho \approx 0$ na análise
+univariada; o efeito da força do adversário é inerentemente interativo (um atacante
+forte pontua mais contra defesas fracas) e deve ser capturado pelos modelos
+não-lineares na etapa de modelagem.
+
+\subsubsection{Multicolinearidade}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{fig3_multicolinearidade.png}
+  \caption{Heatmap de correlação de Spearman entre \textit{features}
+           (A) e zoom no bloco de pontuação e preço (B).}
+  \label{fig:multicol}
+\end{figure}
+
+Há alta correlação entre médias móveis de diferentes janelas:
+$\rho(\texttt{pts\_avg\_3r},\,\texttt{pts\_avg\_5r}) = 0{,}91$ e
+$\rho(\texttt{pts\_avg\_5r},\,\texttt{pts\_avg\_10r}) = 0{,}93$.
+
+\begin{insightbox}
+Multicolinearidade elevada ($\rho > 0{,}84$) entre janelas de pontuação motiva
+regularização forte nos modelos lineares (Ridge/Lasso) e favorece modelos de árvore,
+que são naturalmente robustos por selecionar apenas uma \textit{feature} redundante
+por nó de decisão. Esta é uma das justificativas para esperar que XGBoost e LightGBM
+superem a regressão Ridge.
+\end{insightbox}
+
+\subsubsection{Distribuição das \textit{Features} por Posição}
+\label{subsec:feat_pos}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{fig7_features_por_posicao.png}
+  \caption{Distribuição de \textit{features} de scout por posição (rodada~$\geq 4$).
+           \texttt{DE\_avg\_5r} é concentrada em Goleiros; \texttt{G\_avg\_5r}
+           é dominante em Atacantes.}
+  \label{fig:feat_pos}
+\end{figure}
+
+As distribuições diferem radicalmente entre posições:
+\texttt{DE\_avg\_5r} (defesas) é quase zero em todas as posições exceto Goleiro;
+\texttt{GS\_avg\_5r} (gols sofridos) é exclusivo desta posição.
+Esta heterogeneidade estrutural justifica o \textbf{treinamento de modelos separados
+por posição}: um modelo único não captura simultaneamente os padrões de um Goleiro
+(dominado por defesas e \textit{clean sheets}) e de um Atacante (dominado por gols
+e finalizações).
+
+\subsubsection{Estabilidade das Métricas de Redes}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{fig5_pagerank_elo.png}
+  \caption{Evolução do PageRank (A) e do Elo (B) ao longo das 18~rodadas.
+           Rodada~1 não possui PageRank (grafo vazio); todos os clubes
+           iniciam com Elo~=~1500.}
+  \label{fig:pr_elo}
+\end{figure}
+
+O PageRank exibe alta instabilidade nas primeiras 4--5~rodadas (grafo esparso),
+convergindo progressivamente. O Elo separa com clareza os clubes dominantes:
+Palmeiras e Flamengo acima de 1.580 a partir da rodada~10, e os times em queda.
+Esta estabilidade diferencial sugere que o Elo é mais informativo que o PageRank
+nas rodadas iniciais.
+
+% ============================================================
+\section{Experimentos e Resultados de Modelagem}
+\label{sec:experimentos}
+% ============================================================
+
+\textit{Esta seção será preenchida após a implementação dos modelos. Os experimentos
+seguirão o protocolo walk-forward (rodadas~5--18) descrito na
+Seção~\ref{subsec:modelos}.}
+
+Os resultados a reportar incluem:
+\begin{itemize}[leftmargin=*]
+  \item Tabela comparativa de RMSE, MAE, $R^2$ e Spearman por modelo e por posição;
+  \item \textit{Feature importance} do XGBoost por posição;
+  \item Pontuação das escalações sugeridas vs.\ escalação ótima (retrospecto) e
+        média dos usuários da plataforma;
+  \item Percentil de desempenho das escalações na distribuição de todos os
+        participantes do Cartola FC.
+\end{itemize}
+
+% ============================================================
+\section{Conclusão}
+\label{sec:conclusao}
+% ============================================================
+
+\textit{Esta seção será completada após a finalização dos experimentos.}
+
+Esta fase do trabalho estabeleceu as bases analíticas e a estrutura completa do
+\textit{pipeline}. Os principais achados são:
+
+\begin{enumerate}[leftmargin=*, label=(\roman*)]
+  \item A restrição à amostra Provável é empiricamente justificada: diferença de
+        6,3$\times$ na pontuação e queda de 86,4\% para 24,9\% na taxa de
+        participação ao comparar ``Provável'' com ``Dúvida'';
+  \item \textit{Features} de curto prazo dominam o poder preditivo pré-treino
+        ($\rho_\text{Spearman} \approx 0{,}47$), consistente com dependência
+        de lag~1 identificada na ACF;
+  \item Alta multicolinearidade entre janelas ($\rho > 0{,}84$) favorece modelos
+        de \textit{gradient boosting} sobre regressão linear;
+  \item Heterogeneidade posicional nas distribuições de scouts justifica modelos
+        separados por posição;
+  \item Métricas de redes (PageRank, Elo) têm correlação univariada próxima de zero,
+        mas contribuição interativa é esperada nos modelos não-lineares.
+\end{enumerate}
+
+%============================================================
+% REFERÊNCIAS
+%============================================================
+\newpage
+\bibliographystyle{plainnat}
+\bibliography{referencias}
+
+\end{document}
