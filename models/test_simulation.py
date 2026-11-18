@@ -29,9 +29,10 @@ def make_scenario(rodadas: list[int]) -> tuple[pd.DataFrame, pd.DataFrame]:
 def test_filtra_candidatos_drops_unavailable_status() -> None:
     cand, _ = make_scenario([5])
     cand.loc[cand.index[:3], "status_id"] = 5
+    cand.loc[cand.index[3:6], "status_id"] = 6
     out = filtra_candidatos(cand, 5)
-    assert len(out) == len(cand) - 3
-    assert out["status_id"].isin([6, 7]).all()
+    assert len(out) == len(cand) - 6
+    assert out["status_id"].eq(7).all()
 
 
 def test_simula_cenario_outputs_and_budget_flow() -> None:

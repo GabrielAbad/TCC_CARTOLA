@@ -15,9 +15,9 @@ from models.budget import (
     orcamento_disponivel,
     valoriza_time,
 )
+from models.eligibility import STATUS_CANDIDATOS
 from models.lineup import escalacao_otima, escalacao_sistema, pontuacao_com_capitao
 
-STATUS_CANDIDATOS = frozenset({6, 7})
 CANDIDATE_COLUMNS = (
     "rodada",
     "atleta_id",

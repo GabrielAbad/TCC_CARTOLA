@@ -1,5 +1,5 @@
 %===========================================================
-% TCC — FGV/EMAp
+% TCC FGV/EMAp
 % Predição e Recomendação de Escalações no Cartola FC
 % Gabriel Rodrigues de Deus Abad
 % Orientador: Prof. Moacyr Alvim Horta Barbosa da Silva
@@ -7,12 +7,12 @@
 
 \documentclass[12pt, a4paper, oneside]{article}
 
-%------------------------------------------------------------
+% ============================================================
 % Pacotes
-%------------------------------------------------------------
+% ============================================================
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[brazil]{babel}
+\usepackage[brazilian]{babel}
 \usepackage{lmodern}
 \usepackage{microtype}
 \usepackage{geometry}
@@ -24,6 +24,7 @@
 \usepackage{array}
 \usepackage{multirow}
 \usepackage{graphicx}
+\graphicspath{{../data/eda/}{../data/eda/features/}}
 \usepackage{float}
 \usepackage{subcaption}
 \usepackage{xcolor}
@@ -36,24 +37,24 @@
 \usepackage{enumitem}
 \usepackage{tcolorbox}
 
-%------------------------------------------------------------
+% ============================================================
 % Layout
-%------------------------------------------------------------
+% ============================================================
 \geometry{a4paper, top=2.5cm, bottom=2.5cm, left=3.0cm, right=2.5cm}
 \setstretch{1.3}
 \setlength{\parindent}{1.25cm}
 \setlength{\headheight}{15pt}
 
-%------------------------------------------------------------
+% ============================================================
 % Cores
-%------------------------------------------------------------
+% ============================================================
 \definecolor{azulfgv}{RGB}{0,51,102}
 \definecolor{verdedest}{RGB}{26,122,74}
 \definecolor{cinzaclaro}{RGB}{245,247,250}
 
-%------------------------------------------------------------
+% ============================================================
 % Seções
-%------------------------------------------------------------
+% ============================================================
 \titleformat{\section}
   {\large\bfseries\color{azulfgv}}{\thesection.}{0.6em}{}
   [\vspace{-0.3em}\textcolor{azulfgv}{\rule{\linewidth}{0.8pt}}]
@@ -62,9 +63,9 @@
 \titleformat{\subsubsection}
   {\normalsize\bfseries}{\thesubsubsection.}{0.5em}{}
 
-%------------------------------------------------------------
+% ============================================================
 % Cabeçalho/rodapé
-%------------------------------------------------------------
+% ============================================================
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\small\textcolor{azulfgv}{\textbf{FGV/EMAp}}}
@@ -72,9 +73,9 @@
 \fancyfoot[C]{\small\thepage}
 \renewcommand{\headrulewidth}{0.6pt}
 
-%------------------------------------------------------------
+% ============================================================
 % Caixa de implicação
-%------------------------------------------------------------
+% ============================================================
 \tcbuselibrary{skins,breakable}
 \newtcolorbox{insightbox}{
   enhanced, colback=cinzaclaro, colframe=azulfgv,
@@ -83,9 +84,9 @@
   boxrule=0.6pt, breakable
 }
 
-%------------------------------------------------------------
+% ============================================================
 % Hyperref
-%------------------------------------------------------------
+% ============================================================
 \hypersetup{
   colorlinks=true, linkcolor=azulfgv,
   citecolor=verdedest, urlcolor=azulfgv,
@@ -95,15 +96,16 @@
 
 %============================================================
 \begin{document}
+\pagenumbering{roman}
 %============================================================
 
-%------------------------------------------------------------
+% ============================================================
 % CAPA
-%------------------------------------------------------------
+% ============================================================
 \thispagestyle{empty}
 \begin{center}
   {\large\bfseries\color{azulfgv} FUNDAÇÃO GETULIO VARGAS}\\[0.3em]
-  {\normalsize\color{azulfgv} ESCOLA DE MATEMÁTICA APLICADA -- FGV/EMAp}\\[0.3em]
+  {\normalsize\color{azulfgv} ESCOLA DE MATEMÁTICA APLICADA, FGV/EMAp}\\[0.3em]
   {\normalsize\color{azulfgv} CURSO DE GRADUAÇÃO EM MATEMÁTICA APLICADA}\\[2.5cm]
   {\Large\bfseries\color{azulfgv}
     Predição e Recomendação de Escalações no Cartola FC}\\[0.6em]
@@ -120,9 +122,9 @@
 \end{center}
 \vfill\newpage
 
-%------------------------------------------------------------
+% ============================================================
 % RESUMO
-%------------------------------------------------------------
+% ============================================================
 \thispagestyle{empty}
 \begin{center}{\large\bfseries Resumo}\end{center}
 \vspace{0.5em}
@@ -131,20 +133,24 @@ O Cartola FC é o maior \textit{fantasy game} de futebol do mundo em número de 
 ativos. A escolha de quais jogadores escalar a cada rodada constitui um problema de
 otimização combinatória com incerteza: a pontuação futura de cada atleta depende de
 desempenho recente, qualidade do adversário, mando de campo e disponibilidade para jogo.
-Este trabalho propõe um sistema \textit{end-to-end} que, a partir dos dados históricos
-das 18 primeiras rodadas do Campeonato Brasileiro 2026, prevê a pontuação individual de
+Este trabalho propõe um sistema integrado que, a partir dos dados históricos
+das 34 primeiras rodadas do Campeonato Brasileiro 2026, prevê a pontuação individual de
 cada atleta e recomenda a escalação de maior pontuação esperada dentro das restrições do
 jogo. A metodologia combina: (i)~engenharia de \textit{features} temporais com janelas
 deslizantes sobre os scouts individuais; (ii)~métricas de ciência de redes:
 PageRank ponderado e sistema Elo, calculadas sobre um grafo cumulativo de resultados,
 para quantificar a força relativa dos adversários; (iii)~comparação de modelos preditivos
-(Ridge, XGBoost, LightGBM e LSTM) sob protocolo de validação temporal
+(Ridge, Random Forest, XGBoost, LightGBM e um \textit{ensemble}) sob protocolo temporal
 \textit{walk-forward}; e (iv)~resolução do problema de escalação via Programação Linear
-Inteira (PLI). A análise exploratória revela que o status do atleta é a variável de
+Inteira (PLI). A análise exploratória das 18 primeiras rodadas revela que o status do atleta é a variável de
 filtragem mais crítica: atletas ``Prováveis'' apresentam taxa de participação de 86,4\%
 e pontuação média 6,3$\times$ superior à de atletas em ``Dúvida''. As \textit{features}
 de desempenho histórico de curto prazo dominam o poder preditivo pré-treino, com
-correlação de Spearman com o \textit{target} acima de 0,45.
+correlação de Spearman com o \textit{target} acima de 0,45. Na avaliação preditiva,
+restrita a atletas ``Prováveis'', o \textit{ensemble} obteve MAE de 2,982 e
+correlação de Spearman de 0,115 no primeiro período. O sistema de recomendação
+alcançou 57,45 pontos por rodada nesse período, mas perdeu patrimônio e apresentou
+superestimação entre os atletas escolhidos.
 
 \vspace{1em}\noindent
 \textbf{Palavras-chave:} Fantasy Sports; Cartola FC; Aprendizado de Máquina;
@@ -152,15 +158,15 @@ Ciência de Redes; PageRank; Programação Linear Inteira; Séries Temporais.
 
 \newpage
 
-%------------------------------------------------------------
+% ============================================================
 % SUMÁRIO
-%------------------------------------------------------------
+% ============================================================
 \thispagestyle{empty}
 \tableofcontents
 \newpage
 
 %============================================================
-\setcounter{page}{1}
+\pagenumbering{arabic}
 
 % ============================================================
 \section{Introdução}
@@ -228,8 +234,9 @@ futebol, oferece alternativa dinâmica amplamente adotada em plataformas como
 FiveThirtyEight. Na etapa de otimização, o problema de escalação se assemelha ao
 \textit{Multiple-choice Knapsack Problem} \citep{kellerer2004}; a formulação via PLI
 garante solução ótima para as dimensões do problema. Os modelos preditivos incluem
-o XGBoost \citep{chen2016} como referência estado-da-arte em dados tabulares e redes
-LSTM \citep{hochreiter1997} para captura explícita de dependências temporais.
+o XGBoost \citep{chen2016} como referência para dados tabulares. Esses resultados
+motivam a comparação entre modelos lineares, métodos de árvores e combinações de
+preditores.
 
 % ============================================================
 \section{Dados}
@@ -238,7 +245,7 @@ LSTM \citep{hochreiter1997} para captura explícita de dependências temporais.
 
 \subsection{Fontes e Coleta}
 
-Os dados provêm de duas fontes referentes às 18 primeiras rodadas do Brasileirão 2026:
+Os dados provêm de duas fontes referentes às 34 primeiras rodadas do Brasileirão 2026:
 (i)~\textbf{API pública do Cartola FC}: por rodada, dados de cada atleta escalável:
 pontuação real (\texttt{pontos\_num}), preço (\texttt{preco\_num}), 18 scouts individuais
 e status de disponibilidade (\texttt{status\_id}); (ii)~\textbf{Resultados das partidas}
@@ -254,25 +261,31 @@ e status de disponibilidade (\texttt{status\_id}); (ii)~\textbf{Resultados das p
 \toprule
 \textbf{Dimensão} & \textbf{players.csv} & \textbf{games.csv}\\
 \midrule
-Registros totais  & 13.215 & 179 \\
-Rodadas           & 18     & 18  \\
-Atletas únicos    & 845    & {-} \\
+Registros totais  & 25.681 & 338 \\
+Rodadas           & 34     & 34  \\
+Atletas únicos    & 998    & {-} \\
 Clubes            & 20     & 20  \\
-Variáveis         & 28     &  7  \\
+Variáveis         & 29     &  7  \\
 Valores ausentes  & 0      &  0  \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Amostra de Treino}
+\subsection{Recortes de Análise e Modelagem}
 \label{subsec:amostra}
 
-A modelagem restringe-se à \textbf{amostra de treino}: atletas com status ``Provável''
-(status\_id\,=\,7) que efetivamente entraram em campo (\texttt{entrou\_em\_campo}~=~1).
-Esta restrição é motivada empiricamente na Seção~\ref{subsec:status}: a diferença de
-pontuação média entre ``Provável'' e ``Dúvida'' é de 6,3$\times$
-(3,68 vs.\ 0,58~pts), e a taxa de participação cai de 86,4\% para 24,9\%.
-Dos 13.215 registros totais, 3.294 compõem a amostra de treino.
+A análise exploratória da Seção~\ref{sec:resultados} preserva o recorte das 18
+primeiras rodadas usado na fase inicial do projeto. Nesse recorte, há 13.215 registros,
+dos quais 3.294 correspondem a atletas com status ``Provável''
+(\texttt{status\_id}\,=\,7) que entraram em campo. A diferença de pontuação média
+entre ``Provável'' e ``Dúvida'' é de 6,3$\times$ (3,68 contra 0,58~pts), e a taxa
+de participação cai de 86,4\% para 24,9\%.
+
+Os experimentos preditivos usam as 34 rodadas disponíveis. Em cada rodada de teste,
+o treino contém todas as observações históricas a partir da rodada 4, enquanto a
+avaliação considera somente atletas com status ``Provável''. Esse recorte reproduz
+o conjunto de candidatos fornecido ao otimizador e evita recomendar atletas cuja
+disponibilidade já era incerta antes do fechamento do mercado.
 
 % ============================================================
 \section{Metodologia}
@@ -293,21 +306,18 @@ $\to$ \textbf{Otimização}
 \subsection{Engenharia de \textit{Features}}
 \label{subsec:features}
 
-O dataset final \texttt{df\_features} tem uma linha por par (atleta,~rodada) e
-$\approx$65 colunas. O protocolo \textit{walk-forward} garante que toda \textit{feature}
+O dataset final \texttt{df\_features} tem 25.681 linhas, uma por par
+(atleta,~rodada), e 65 colunas. O protocolo \textit{walk-forward} garante que toda \textit{feature}
 da rodada $t$ usa exclusivamente dados das rodadas $1,\ldots,t-1$, eliminando
 \textit{data leakage}. As \textit{features} são organizadas em cinco blocos:
 
 \subsubsection*{Bloco 1: Desempenho Histórico do Atleta}
-Médias móveis de pontuação com janelas $k \in \{3,5,10\}$ rodadas jogadas
-(\texttt{pts\_avg\_3r}/\texttt{5r}/\texttt{10r}), desvio padrão móvel
-(\texttt{pts\_std\_3r}/\texttt{5r}), máximo e mediana nas últimas 5~rodadas, e
-tendência linear (\texttt{pts\_trend\_5r}), coeficiente angular de regressão
-de pontuação sobre rodada nas últimas 5~aparições. Para cada scout relevante
-(G, A, FT, FF, FD, FS, FC, CA, DS, DE, SG, GS), médias móveis de 3 e 5~rodadas.
-Completam o bloco: proporção de rodadas com pontuação positiva (\texttt{prop\_jogou})
-e sequência consecutiva de rodadas acima da própria média histórica
-(\texttt{pts\_acima\_media\_streak}).
+São calculadas médias móveis de pontuação para 3, 5 e 10~rodadas, além de
+desvio padrão para 3 e 5~rodadas, máximo, mediana e tendência nas últimas
+5~aparições. Os scouts relevantes (G, A, FT, FF, FD, FS, FC, CA, DS, DE,
+SG e GS) recebem médias móveis de 3 e 5~rodadas. O bloco inclui ainda a
+proporção de pontuações positivas e a sequência de rodadas acima da média
+histórica do atleta.
 
 \subsubsection*{Bloco 2: Contexto da Partida}
 Mando de campo binário (\texttt{is\_mandante}); força do adversário via PageRank
@@ -318,9 +328,8 @@ contra aquele adversário (\texttt{h2h\_pts\_avg}); e fase do campeonato
 (\texttt{fase\_campeonato}).
 
 \subsubsection*{Bloco 3: Preço e Mercado}
-Preço atual (\texttt{preco\_num}), variação acumulada nas últimas 3~rodadas
-(\texttt{preco\_variacao\_3r}) e índice custo-benefício histórico
-(\texttt{cb\_avg\_5r}).
+Preço atual, variação acumulada nas últimas 3~rodadas e índice de
+custo-benefício histórico nas últimas 5~rodadas.
 
 \subsubsection*{Bloco 4: \textit{Features} do Time}
 Forma nas últimas 5~rodadas em pontos de tabela (\texttt{time\_forma\_5r}),
@@ -368,25 +377,27 @@ onde $K$ é o fator de sensibilidade (ajustado empiricamente), $S_A \in \{0;\,0{
 Formulamos o problema como regressão supervisionada: dado o vetor
 $\mathbf{x}_{i,t}$, estimar $\hat{y}_{i,t} \approx y_{i,t}$ (pontuação real).
 O protocolo \textit{walk-forward} treina o modelo nas rodadas $4,\ldots,t-1$
-e avalia na rodada $t$, repetindo para $t = 5,\ldots,18$.
+e avalia na rodada $t$. A avaliação é dividida em dois períodos: rodadas 5 a 18
+e rodadas 19 a 34. Em cada teste são mantidos apenas os atletas com status
+``Provável''.
 
 Os modelos comparados são:
 \begin{enumerate}[leftmargin=*, label=(\roman*)]
-  \item \textbf{Baseline}: média ponderada das últimas 5~rodadas do atleta;
-  \item \textbf{Ridge / Lasso}: regressão linear com regularização $L_2$ / $L_1$,
-        $\alpha$ ajustado por validação cruzada temporal;
-  \item \textbf{Random Forest}: 300~árvores, \textit{feature importance} via
-        impureza de Gini;
+  \item \textbf{Baseline}: média das últimas 5~rodadas do atleta, com uso da
+        média de 3~rodadas quando a primeira não está disponível;
+  \item \textbf{Ridge}: regressão linear com regularização $L_2$;
+  \item \textbf{Random Forest}: 200~árvores e profundidade máxima igual a 8;
   \item \textbf{XGBoost / LightGBM}: \textit{gradient boosting} com
-        hiperparâmetros otimizados via Optuna (50 tentativas, otimização bayesiana);
-  \item \textbf{LSTM}: 2~camadas de 64~unidades, \textit{dropout}~0,2,
-        janelas deslizantes de 5~rodadas por atleta.
+        hiperparâmetros otimizados via Optuna, com 20 tentativas por rodada e posição;
+  \item \textbf{Ensemble}: combinação de Ridge, Random Forest, XGBoost e LightGBM,
+        ponderada pelo inverso do MAE observado nas 3~rodadas anteriores.
 \end{enumerate}
 
 Os modelos são treinados \textbf{separadamente por posição} (motivação detalhada
 na Seção~\ref{subsec:feat_pos}).
-Métricas de avaliação: RMSE, MAE, $R^2$ e correlação de Spearman entre pontuação
-prevista e real (esta diretamente relevante para a qualidade do ranking de escalação).
+As métricas de avaliação são RMSE, MAE, $R^2$, correlação de Spearman entre
+pontuação prevista e real e precisão entre os três atletas mais bem pontuados de
+cada posição e rodada (\textit{Top3Prec}).
 
 \subsection{Otimização de Escalação}
 \label{subsec:otimizacao}
@@ -401,17 +412,24 @@ Dadas as pontuações previstas $\{\hat{y}_{i,t}\}$, o problema de escalação �
   & \sum_{i:\,p_i=k} x_i = n_k,\quad
     k \in \{\text{Gol, Lat, Zag, Mei, Ata, Téc}\} \tag{posições}\\
   & \sum_{i:\,\text{clube}(i)=j} x_i \leq 5,\quad \forall j \tag{concentração}\\
-  & x_i = 0,\quad \forall i : \text{status}(i) \neq \text{Provável} \tag{disponib.}
+  & x_i = 0,\quad \forall i : \text{status}(i) \neq
+    \text{Provável} \tag{disponib.}
 \end{align}
 
 com $n_k$ vagas por posição (1 Goleiro, 2 Laterais, 2 Zagueiros, 3 Meias,
-3 Atacantes, 1 Técnico) e $x_i \in \{0,1\}$. Resolvido via solver CBC / PuLP
-em tempo sub-segundo para $\approx$700 atletas disponíveis por rodada.
+3 Atacantes, 1 Técnico) e $x_i \in \{0,1\}$. O orçamento inicial é de
+130 cartoletas e passa a incorporar o saldo e o valor atualizado do elenco.
+Após a seleção, o capitão é o atleta de linha com maior razão entre previsão e
+desvio padrão histórico. O problema é resolvido via CBC/PuLP em tempo inferior
+a um segundo para cerca de 700 candidatos por rodada.
 
 % ============================================================
 \section{Resultados: EDA e Engenharia de \textit{Features}}
 \label{sec:resultados}
 % ============================================================
+
+Os resultados exploratórios desta seção correspondem às 18 primeiras rodadas,
+recorte preservado para manter comparabilidade com a etapa inicial do estudo.
 
 \subsection{Distribuição de Pontuações por Posição}
 
@@ -461,15 +479,6 @@ O coeficiente de variação (CV) permanece entre 86\% e 108\% em todas as 18~rod
 refletindo a natureza assimétrica dos scouts. A análise de ACF/PACF das séries
 individuais (calculada apenas sobre rodadas Provável e em campo, sem imputação de
 zeros) indica dependência temporal predominantemente de lag~1.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.92\linewidth]{fig3_acf_pacf.png}
-  \caption{ACF e PACF para séries individuais de três atletas representativos:
-           Pedro (Atacante), Danilo (Meia) e Lucas Arcanjo (Goleiro).
-           Bandas: IC~95\% sob hipótese de ruído branco.}
-  \label{fig:acf}
-\end{figure}
 
 \begin{insightbox}
 Ausência de autocorrelação significativa em lags superiores a 2 justifica janelas
@@ -560,13 +569,11 @@ Atacante  & 5,45 & 4,37 & $+$1,08 & **\\
   \label{fig:spearman}
 \end{figure}
 
-As \textit{features} de desempenho histórico dominam: \texttt{pts\_avg\_10r},
-\texttt{pts\_avg\_5r} e \texttt{pts\_max\_5r} atingem $\rho \approx 0{,}47$
-(Figura~\ref{fig:spearman}). As métricas de ciência de redes
-(\texttt{adv\_pagerank}, \texttt{adv\_elo}) apresentam $\rho \approx 0$ na análise
-univariada; o efeito da força do adversário é inerentemente interativo (um atacante
-forte pontua mais contra defesas fracas) e deve ser capturado pelos modelos
-não-lineares na etapa de modelagem.
+As médias de pontuação de 5 e 10~rodadas e o máximo recente atingem
+$\rho \approx 0{,}47$ (Figura~\ref{fig:spearman}). PageRank e Elo do adversário
+apresentam $\rho \approx 0$ na análise univariada. A força do adversário pode
+depender do perfil do atleta e, por isso, sua contribuição deve ser avaliada
+nos modelos não lineares.
 
 \subsubsection{Multicolinearidade}
 
@@ -578,16 +585,14 @@ não-lineares na etapa de modelagem.
   \label{fig:multicol}
 \end{figure}
 
-Há alta correlação entre médias móveis de diferentes janelas:
-$\rho(\texttt{pts\_avg\_3r},\,\texttt{pts\_avg\_5r}) = 0{,}91$ e
-$\rho(\texttt{pts\_avg\_5r},\,\texttt{pts\_avg\_10r}) = 0{,}93$.
+Há alta correlação entre médias móveis de diferentes janelas. A correlação
+entre as médias de 3 e 5~rodadas é 0,91, enquanto a correlação entre as
+médias de 5 e 10~rodadas é 0,93.
 
 \begin{insightbox}
 Multicolinearidade elevada ($\rho > 0{,}84$) entre janelas de pontuação motiva
-regularização forte nos modelos lineares (Ridge/Lasso) e favorece modelos de árvore,
-que são naturalmente robustos por selecionar apenas uma \textit{feature} redundante
-por nó de decisão. Esta é uma das justificativas para esperar que XGBoost e LightGBM
-superem a regressão Ridge.
+regularização no modelo Ridge e a comparação com modelos de árvore. Estes podem
+selecionar apenas uma variável redundante em cada divisão.
 \end{insightbox}
 
 \subsubsection{Distribuição das \textit{Features} por Posição}
@@ -621,7 +626,7 @@ e finalizações).
   \label{fig:pr_elo}
 \end{figure}
 
-O PageRank exibe alta instabilidade nas primeiras 4--5~rodadas (grafo esparso),
+O PageRank exibe alta instabilidade nas primeiras 4 a 5~rodadas (grafo esparso),
 convergindo progressivamente. O Elo separa com clareza os clubes dominantes:
 Palmeiras e Flamengo acima de 1.580 a partir da rodada~10, e os times em queda.
 Esta estabilidade diferencial sugere que o Elo é mais informativo que o PageRank
@@ -632,44 +637,166 @@ nas rodadas iniciais.
 \label{sec:experimentos}
 % ============================================================
 
-\textit{Esta seção será preenchida após a implementação dos modelos. Os experimentos
-seguirão o protocolo walk-forward (rodadas~5--18) descrito na
-Seção~\ref{subsec:modelos}.}
+\subsection{Protocolo Experimental}
 
-Os resultados a reportar incluem:
-\begin{itemize}[leftmargin=*]
-  \item Tabela comparativa de RMSE, MAE, $R^2$ e Spearman por modelo e por posição;
-  \item \textit{Feature importance} do XGBoost por posição;
-  \item Pontuação das escalações sugeridas vs.\ escalação ótima (retrospecto) e
-        média dos usuários da plataforma;
-  \item Percentil de desempenho das escalações na distribuição de todos os
-        participantes do Cartola FC.
-\end{itemize}
+O primeiro período de avaliação compreende as rodadas 5 a 18 e contém 3.080
+observações de atletas com status ``Provável''. O segundo compreende as rodadas
+19 a 34, com 3.434 observações. A cada rodada, os modelos são novamente ajustados
+com todo o histórico anterior disponível. O treino e o teste são separados por
+posição. O segundo período preserva a continuidade temporal do primeiro, inclusive
+no cálculo dos pesos do \textit{ensemble} e no orçamento da simulação.
+
+\subsection{Desempenho Preditivo}
+
+A Tabela~\ref{tab:modelos} apresenta os resultados agregados do primeiro período.
+O \textit{ensemble} obteve o menor RMSE e MAE. Em relação ao \textit{baseline},
+o MAE caiu de 3,152 para 2,982, redução de 5,4\%. O ganho absoluto é pequeno.
+Todos os modelos apresentaram $R^2$ negativo, o que indica erro médio superior ao
+de uma previsão constante igual à média. A correlação de Spearman ficou entre
+0,086 e 0,122, o que mostra ordenação fraca entre atletas já classificados como
+prováveis. O Random Forest apresentou a maior precisão dos três melhores
+(\textit{Top3Prec} = 0,171) e foi usado na etapa de escalação.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Desempenho preditivo nas rodadas 5 a 18 (apenas Provável)}
+\label{tab:modelos}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Modelo} & \textbf{RMSE} & \textbf{MAE} & $\mathbf{R^2}$
+& \textbf{Spearman} & \textbf{Top3Prec}\\
+\midrule
+Ensemble      & \textbf{3,783} & \textbf{2,982} & $-0{,}064$
+              & 0,115 & 0,147\\
+Ridge         & 3,816 & 2,994 & $-0{,}092$ & \textbf{0,122} & 0,147\\
+LightGBM      & 3,825 & 3,002 & $-0{,}090$ & 0,088 & 0,147\\
+Random Forest & 3,786 & 3,008 & $-0{,}064$ & 0,110 & \textbf{0,171}\\
+XGBoost       & 3,893 & 3,056 & $-0{,}138$ & 0,088 & 0,123\\
+Baseline      & 4,077 & 3,152 & $-0{,}247$ & 0,086 & 0,099\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+No segundo período, o MAE do \textit{ensemble} aumentou para 3,118, mas a
+correlação de Spearman passou para 0,175, o melhor valor entre os modelos. O
+histórico adicional melhorou o ranqueamento sem reduzir o erro absoluto. Esse
+resultado importa porque o otimizador depende das primeiras posições do ranking.
+Ainda assim, a precisão dos três melhores permaneceu baixa: 0,171 no Random Forest
+no primeiro período e 0,194 no \textit{ensemble} no segundo.
+
+As diferenças por posição reforçam a dificuldade do problema. No primeiro período,
+o Ridge alcançou Spearman de 0,190 para meias, com MAE de 2,704. Para atacantes,
+o mesmo modelo apresentou MAE de 3,703 e Spearman de 0,148. A importância de
+variáveis estimada pelo XGBoost continuou atribuindo maior peso a
+\texttt{prob\_jogar} nas posições de linha, com importância média entre 0,16 e
+0,20. Médias recentes, preço e indicadores de força do clube também apareceram
+entre as variáveis principais. Para técnicos, prevaleceram variáveis coletivas,
+como gols sofridos pelo clube, tendência de pontuação e mando de campo.
+
+\subsection{Avaliação do Sistema de Recomendação}
+
+O Random Forest foi usado para fornecer as pontuações esperadas ao PLI. A
+Tabela~\ref{tab:sistema} compara os dois períodos. O ótimo retrospectivo resolve
+o mesmo problema de escalação com conhecimento dos pontos reais e do melhor
+capitão, restrito ao conjunto de atletas prováveis. Ele representa um limite
+superior e não uma estratégia disponível antes da rodada.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Desempenho do sistema integrado}
+\label{tab:sistema}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Métrica} & \textbf{Rodadas 5 a 18} & \textbf{Rodadas 19 a 34}\\
+\midrule
+Pontos do sistema por rodada       & 57,45 & 47,71\\
+Pontos do ótimo por rodada         & 180,05 & 181,14\\
+Pontos previstos por rodada        & 75,68 & 75,05\\
+Eficiência agregada                & 31,91\% & 26,34\%\\
+Patrimônio inicial                 & 130,00 & 97,26\\
+Patrimônio final                   & 97,26 & 82,21\\
+MAE entre os escalados             & 3,87 & 3,87\\
+Viés entre os escalados            & $-1,29$ & $-2,05$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+No primeiro período, a escalação somou 804,3 pontos, média de 57,45 por rodada,
+e atingiu 31,91\% do ótimo retrospectivo. No segundo, a média caiu para 47,71
+pontos e a eficiência agregada para 26,34\%. A previsão total permaneceu próxima
+de 75 a 76 pontos por rodada, mas a realização ficou bem abaixo. O patrimônio
+passou de 130,00 para 97,26 cartoletas e terminou a rodada 34 em 82,21 cartoletas.
+A incidência de pontuação igual a zero entre os escolhidos aumentou de 11,9\%
+para 21,9\%, mesmo com o filtro exclusivo de atletas ``Prováveis''.
+
+O erro dos atletas escalados foi superior ao erro do conjunto de candidatos. No
+primeiro período, o MAE do Random Forest foi 3,008 no conjunto de avaliação e
+3,87 entre os escolhidos. Atacantes escalados foram previstos com média de 6,72
+pontos e obtiveram 4,57, o que produz viés de $-2,14$. No segundo período, o viés
+dessa posição chegou a $-2,64$. O otimizador seleciona a parte superior da
+distribuição prevista e, com isso, concentra superestimações do modelo. Esse
+efeito é conhecido como maldição do vencedor.
+
+\subsection{Diagnóstico e Possíveis Melhorias}
+
+O desempenho fraco do sistema não decorre de uma única etapa. Entre atletas já
+marcados como prováveis, a previsão explica pouca variação e produz ordenação
+fraca. Em seguida, o PLI trata as estimativas como valores certos e escolhe seus
+extremos. O aumento do MAE entre os escolhidos confirma que a qualidade média do
+regressor não se transfere diretamente para a decisão. A restrição ao status
+``Provável'' não elimina os zeros: parte dos atletas indicados como disponíveis
+não entra em campo, o que mostra o limite do status prévio. A função objetivo
+também não considera incerteza, valorização ou custo futuro, e a queda
+patrimonial reduz progressivamente o conjunto de escalações viáveis.
+
+Uma formulação mais adequada pode usar uma previsão ajustada pela probabilidade
+de participação e por uma penalidade proporcional à incerteza. Limites inferiores
+de predição ou redução das estimativas extremas diminuiriam a exposição à
+maldição do vencedor. O patrimônio pode entrar como segundo objetivo, acompanhado
+de limite de trocas, para evitar a seleção recorrente de equipes caras que perdem
+valor. Também é necessário comparar o PLI alimentado pelo Random Forest com o
+mesmo otimizador alimentado pelo \textit{baseline} e pelo \textit{ensemble}.
+Essa ablação permitiria separar o ganho do modelo preditivo do ganho decorrente
+das restrições do PLI.
+
+Os resultados disponíveis não permitem afirmar que o sistema foi inferior a um
+usuário humano. O repositório não contém pontuações de ligas ou percentis da
+plataforma. A pontuação absoluta e a perda de patrimônio indicam desempenho
+insatisfatório, mas a comparação com pessoas exige uma amostra de escalações
+registradas antes de cada rodada.
 
 % ============================================================
 \section{Conclusão}
 \label{sec:conclusao}
 % ============================================================
 
-\textit{Esta seção será completada após a finalização dos experimentos.}
+Este trabalho construiu um fluxo reproduzível que integra dados históricos,
+\textit{features} temporais e de redes, modelos por posição e otimização inteira.
+A análise exploratória mostrou a importância do status de disponibilidade, do
+mando de campo e do histórico recente. Na avaliação temporal restrita a atletas
+``Prováveis'', o \textit{ensemble} apresentou o menor MAE no primeiro período
+(2,982), com Spearman de 0,115. O aumento do histórico elevou a correlação de
+ordenação do melhor modelo para 0,175, sem redução do erro absoluto.
 
-Esta fase do trabalho estabeleceu as bases analíticas e a estrutura completa do
-\textit{pipeline}. Os principais achados são:
+A etapa de decisão revelou a principal limitação do método. O PLI transformou
+previsões fracas em escolhas concentradas na cauda superior, onde o erro foi
+maior e predominantemente otimista. A eficiência agregada caiu de 31,91\% para
+26,34\% do ótimo retrospectivo, enquanto o patrimônio passou de 130,00 para
+82,21 cartoletas. Mesmo com candidatos apenas ``Prováveis'', 11,9\% e 21,9\% dos
+escalados obtiveram zero ponto nos dois períodos. Portanto, filtrar disponibilidade
+declarada não resolve a incerteza de participação, e uma métrica média de
+regressão não garante uma escalação competitiva quando o otimizador ignora a
+incerteza das estimativas.
 
-\begin{enumerate}[leftmargin=*, label=(\roman*)]
-  \item A restrição à amostra Provável é empiricamente justificada: diferença de
-        6,3$\times$ na pontuação e queda de 86,4\% para 24,9\% na taxa de
-        participação ao comparar ``Provável'' com ``Dúvida'';
-  \item \textit{Features} de curto prazo dominam o poder preditivo pré-treino
-        ($\rho_\text{Spearman} \approx 0{,}47$), consistente com dependência
-        de lag~1 identificada na ACF;
-  \item Alta multicolinearidade entre janelas ($\rho > 0{,}84$) favorece modelos
-        de \textit{gradient boosting} sobre regressão linear;
-  \item Heterogeneidade posicional nas distribuições de scouts justifica modelos
-        separados por posição;
-  \item Métricas de redes (PageRank, Elo) têm correlação univariada próxima de zero,
-        mas contribuição interativa é esperada nos modelos não-lineares.
-\end{enumerate}
+O desenvolvimento posterior deve avaliar previsões ajustadas pela probabilidade
+de participação, penalização de risco e redução de valores extremos. A função
+objetivo deve considerar simultaneamente pontuação e patrimônio, com controle de
+trocas. Ablações entre modelos e uma comparação prospectiva com escalações humanas
+são necessárias para determinar o ganho real de cada componente. Esses ajustes
+tratam diretamente as falhas observadas, em vez de apenas aumentar a complexidade
+do modelo preditivo.
 
 %============================================================
 % REFERÊNCIAS
